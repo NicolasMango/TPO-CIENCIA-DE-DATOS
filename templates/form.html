@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1> Recomendacion de juegos </h1>
+    <form action="/predict" method="post">
+        <label for="genero"> Genero:</label>
+        <input type="text" id="genre_encoded" name="genre_encoded">
+        <label> Minutos </label>
+        <input type="text" id="Single-Player_Main Story_Average" name="Single-Player_Main Story_Average" value="0">
+        <button type="submit"> Recomendar</button>
+    </form>
+    {% if prediction %}
+    <h2>Juego Recomendado {{ prediction}}</h2>
+    {% endif %}
+</body>
+</html>
