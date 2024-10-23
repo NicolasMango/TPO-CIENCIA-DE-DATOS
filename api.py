@@ -2,6 +2,7 @@ from flask import Flask, request , render_template ,jsonify
 import joblib
 import pandas as pd
 import numpy as np
+
 app = Flask(__name__)
 model = joblib.load("knn_model.pkl")
 label_encoder = joblib.load('label_encoder.pkl')
