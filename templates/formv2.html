@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recomendación de Juegos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        h1 {
+            color: #333;
+            font-size: 2em;
+            margin-top: 20px;
+        }
+        .draggable-container {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .draggable {
+            width: 150px;
+            padding: 15px;
+            background-color: #007bff;
+            color: white;
+            text-align: center;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 8px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+        }
+        #dropzone {
+            width: 80%;
+            max-width: 500px;
+            min-height: 150px;
+            border: 2px dashed #007bff;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #e8f1ff;
+            transition: background-color 0.3s;
+            color: #555;
+        }
+        #dropzone.highlight {
+            background-color: #cce4ff;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 80%;
+            max-width: 400px;
+            margin-top: 20px;
+        }
+        label {
+            font-weight: bold;
+        }
+        input[type="text"] {
+            padding: 10px;
+            font-size: 1em;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px;
+            font-size: 1em;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Recomendación de Juegos</h1>
+    
+    <div class="draggable-container">
+        <div class="draggable" draggable="true" id="accion" value="Action">Action</div>
+        <div class="draggable" draggable="true" id="tiros" value="Shooter">Shooter</div>
+        <div class="draggable" draggable="true" id="primera_persona" value="First-Person">First-Person</div>
+        <div class="draggable" draggable="true" id="aventura" value="Adventure">Adventure</div>
+        <div class="draggable" draggable="true" id="rol" value="Role-Playing">Role-Playing</div>
+    </div>
+
+    <div id="dropzone">Arrastra aquí los géneros que prefieres</div>
+
+    <form action="/predict" method="post">
+        <label for="genre_encoded">Géneros seleccionados:</label>
+        <input type="text" id="genre_encoded" name="genre_encoded" placeholder="Selecciona géneros" readonly>
+        <label> Minutos </label>
+        <input type="text" id="Single-Player_Main Story_Average" name="Single-Player_Main Story_Average" value="0">
+        <button type="submit">Recomendar</button>
+    </form>
+    
+    {% if prediction %}
+    <h2>Juego Recomendado: {{ prediction }}</h2>
+    {% endif %}
+
+    <script>
+        // Añadimos eventos de arrastre a los elementos
+        document.querySelectorAll('.draggable').forEach(item => {
+            item.addEventListener('dragstart', event => {
+                event.dataTransfer.setData('text', event.target.id);
+            });
+        });
+
+        const dropzone = document.getElementById('dropzone');
+        const genreInput = document.getElementById('genre_encoded');
+
+        // Configuramos la zona de destino para aceptar el arrastre
+        dropzone.addEventListener('dragover', event => {
+            event.preventDefault();
+            dropzone.classList.add('highlight');
+        });
+
+        dropzone.addEventListener('dragleave', () => {
+            dropzone.classList.remove('highlight');
+        });
+
+        dropzone.addEventListener('drop', event => {
+            event.preventDefault();
+            dropzone.classList.remove('highlight');
+            const id = event.dataTransfer.getData('text');
+            const draggedElement = document.getElementById(id);
+
+            // Verifica si el género ya fue agregado
+            const currentGenres = genreInput.value.split(', ').filter(g => g.trim() !== "");
+            if (!currentGenres.includes(draggedElement.innerText)) {
+                currentGenres.push(draggedElement.innerText);
+                genreInput.value = currentGenres.join(', ');
+            }
+        });
+    </script>
+</body>
+</html>

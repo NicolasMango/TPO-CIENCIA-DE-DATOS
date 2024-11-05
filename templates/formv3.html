@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recomendación de Juegos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        h1 {
+            color: #333;
+            font-size: 2em;
+            margin-top: 20px;
+        }
+
+        .draggable-container {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .draggable {
+            width: 150px;
+            padding: 15px;
+            background-color: #007bff;
+            color: white;
+            text-align: center;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 8px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        #dropzone {
+            width: 80%;
+            max-width: 500px;
+            min-height: 150px;
+            border: 2px dashed #007bff;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #e8f1ff;
+            transition: background-color 0.3s;
+            color: #555;
+        }
+
+        #dropzone.highlight {
+            background-color: #cce4ff;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 80%;
+            max-width: 400px;
+            margin-top: 20px;
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        input[type="text"] {
+            padding: 10px;
+            font-size: 1em;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            padding: 10px;
+            font-size: 1em;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .slider-container input[type="range"] {
+            width: 100%;
+        }
+
+        #availability-status {
+            font-style: italic;
+            color: #555;
+            margin-top: 5px;
+        }
+
+        .podio-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .podio-item {
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            color: white;
+        }
+
+        .first {
+            background-color: gold;
+            order: 1;
+            font-size: 1.5em;
+        }
+
+        .second {
+            background-color: silver;
+            order: 2;
+            font-size: 1.3em;
+        }
+
+        .third {
+            background-color: #cd7f32;
+            /* Bronce */
+            order: 3;
+            font-size: 1.1em;
+        }
+
+        .other-options {
+            margin-top: 20px;
+        }
+
+        .other-options h3 {
+            color: #555;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Recomendación de Juegos</h1>
+
+    <div class="draggable-container">
+        <div class="draggable" draggable="true" id="accion" value="Action">Action</div>
+        <div class="draggable" draggable="true" id="tiros" value="Shooter">Shooter</div>
+        <div class="draggable" draggable="true" id="primera_persona" value="First-Person">First-Person</div>
+        <div class="draggable" draggable="true" id="aventura" value="Adventure">Adventure</div>
+        <div class="draggable" draggable="true" id="rol" value="Role-Playing">Role-Playing</div>
+    </div>
+
+    <div id="dropzone">Arrastra aquí los géneros que prefieres</div>
+
+    <form action="/predict" method="post">
+        <label for="genre_encoded">Géneros seleccionados:</label>
+        <input type="text" id="genre_encoded" name="genre_encoded" placeholder="Selecciona géneros" readonly>
+
+        <label>Minutos de Juego</label>
+        <div class="slider-container">
+            <input type="range" id="minutes_slider" name="Single-Player_Main Story_Average" min="0" max="5000"
+                value="0">
+            <span id="minutes_display">0</span> min
+        </div>
+
+        <div id="availability-status">Ocupado</div>
+
+        <button type="submit">Recomendar</button>
+    </form>
+
+    {% if prediction %}
+    <div class="podio">
+        <h2>Recomendado: {{ prediction[0] }}</h2>
+        <div class="podio-container">
+            <div class="podio-item second">
+                <h3>2° Lugar: {{ prediction[1] }}</h3>
+            </div>
+            <div class="podio-item first">
+                <h3>1° Lugar: {{ prediction[0] }}</h3>
+            </div>
+            <div class="podio-item third">
+                <h3>3° Lugar: {{ prediction[2] }}</h3>
+            </div>
+        </div>
+        <div class="other-options">
+            <h3>Opción 4: {{ prediction[3] }}</h3>
+            <h3>Opción 5: {{ prediction[4] }}</h3>
+        </div>
+    </div>
+    {% endif %}
+
+    <script>
+        // Configuración de drag and drop para géneros
+        document.querySelectorAll('.draggable').forEach(item => {
+            item.addEventListener('dragstart', event => {
+                event.dataTransfer.setData('text', event.target.id);
+            });
+        });
+
+        const dropzone = document.getElementById('dropzone');
+        const genreInput = document.getElementById('genre_encoded');
+
+        dropzone.addEventListener('dragover', event => {
+            event.preventDefault();
+            dropzone.classList.add('highlight');
+        });
+
+        dropzone.addEventListener('dragleave', () => {
+            dropzone.classList.remove('highlight');
+        });
+
+        dropzone.addEventListener('drop', event => {
+            event.preventDefault();
+            dropzone.classList.remove('highlight');
+            const id = event.dataTransfer.getData('text');
+            const draggedElement = document.getElementById(id);
+
+            const currentGenres = genreInput.value.split(', ').filter(g => g.trim() !== "");
+            if (!currentGenres.includes(draggedElement.innerText)) {
+                currentGenres.push(draggedElement.innerText);
+                genreInput.value = currentGenres.join(', ');
+            }
+        });
+
+        // Configuración de slider para minutos de juego
+        const slider = document.getElementById('minutes_slider');
+        const display = document.getElementById('minutes_display');
+        const availabilityStatus = document.getElementById('availability-status');
+
+        slider.addEventListener('input', () => {
+            const minutes = slider.value;
+            display.textContent = minutes;
+
+            // Actualización del texto de disponibilidad según el valor de minutos
+            if (minutes >= 0 && minutes <= 400) {
+                availabilityStatus.textContent = "Poca Disponibilidad";
+            } else if (minutes >= 401 && minutes <= 1000) {
+                availabilityStatus.textContent = "Tengo Disponibilidad";
+            } else if (minutes >= 1001 && minutes <= 5000) {
+                availabilityStatus.textContent = "En la Pera";
+            }
+        });
+    </script>
+</body>
+
+</html>
