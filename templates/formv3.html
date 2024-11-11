@@ -6,21 +6,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Recomendación de Juegos</title>
     <style>
+        /* Estilo general */
         body {
             font-family: Arial, sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
-            background-color: #f5f5f5;
-            color: #333;
+            background-color: #141414;
+            color: #e5e5e5;
+            margin: 0;
+            padding: 0;
         }
 
         h1 {
-            color: #333;
-            font-size: 2em;
+            color: #370bf8;
+            font-size: 2.5em;
             margin-top: 20px;
         }
 
+        /* Contenedor de géneros */
         .draggable-container {
             display: flex;
             gap: 15px;
@@ -30,20 +34,27 @@
         .draggable {
             width: 150px;
             padding: 15px;
-            background-color: #007bff;
-            color: white;
+            background-color: #333;
+            color: #e5e5e5;
             text-align: center;
             font-weight: bold;
             cursor: pointer;
             border-radius: 8px;
-            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.4);
+            transition: transform 0.3s, background-color 0.3s;
         }
 
+        .draggable:hover {
+            background-color: #370bf8;
+            transform: scale(1.05);
+        }
+
+        /* Área de arrastre */
         #dropzone {
             width: 80%;
             max-width: 500px;
             min-height: 150px;
-            border: 2px dashed #007bff;
+            border: 2px dashed #370bf8;
             border-radius: 10px;
             display: flex;
             flex-direction: column;
@@ -51,15 +62,17 @@
             justify-content: center;
             margin-top: 20px;
             padding: 20px;
-            background-color: #e8f1ff;
+            background-color: #222;
+            color: #aaa;
             transition: background-color 0.3s;
-            color: #555;
         }
 
         #dropzone.highlight {
-            background-color: #cce4ff;
+            background-color: #333;
+            color: #e5e5e5;
         }
 
+        /* Formulario */
         form {
             display: flex;
             flex-direction: column;
@@ -71,19 +84,22 @@
 
         label {
             font-weight: bold;
+            color: #e5e5e5;
         }
 
         input[type="text"] {
             padding: 10px;
             font-size: 1em;
-            border: 1px solid #ccc;
+            background-color: #333;
+            color: #e5e5e5;
+            border: 1px solid #444;
             border-radius: 5px;
         }
 
         button {
-            padding: 10px;
+            padding: 12px;
             font-size: 1em;
-            background-color: #007bff;
+            background-color: #370bf8;
             color: white;
             border: none;
             border-radius: 5px;
@@ -92,9 +108,10 @@
         }
 
         button:hover {
-            background-color: #0056b3;
+            background-color: #370bf8;
         }
 
+        /* Slider */
         .slider-container {
             display: flex;
             align-items: center;
@@ -107,8 +124,20 @@
 
         #availability-status {
             font-style: italic;
-            color: #555;
+            color: #e5e5e5;
             margin-top: 5px;
+        }
+
+        /* Estilo del podio */
+        .podio {
+            text-align: center;
+            margin-top: 30px;
+            color: #e5e5e5;
+        }
+
+        .podio h2 {
+            color: #e50914;
+            font-size: 1.8em;
         }
 
         .podio-container {
@@ -120,37 +149,45 @@
         }
 
         .podio-item {
-            padding: 10px;
+            padding: 15px;
             border-radius: 8px;
             text-align: center;
-            color: white;
+            width: 120px;
+            color: #e5e5e5;
+            font-weight: bold;
+            transition: transform 0.3s;
+        }
+
+        .podio-item:hover {
+            transform: scale(1.1);
         }
 
         .first {
-            background-color: gold;
+            background-color: #370bf8;
             order: 1;
-            font-size: 1.5em;
+            font-size: 1.3em;
+            padding: 20px;
         }
 
         .second {
-            background-color: silver;
+            background-color: #b3b3b3;
             order: 2;
-            font-size: 1.3em;
+            font-size: 1.2em;
         }
 
         .third {
             background-color: #cd7f32;
-            /* Bronce */
             order: 3;
             font-size: 1.1em;
         }
 
         .other-options {
             margin-top: 20px;
+            color: #999;
         }
 
         .other-options h3 {
-            color: #555;
+            color: #bbb;
         }
     </style>
 </head>
@@ -174,8 +211,7 @@
 
         <label>Minutos de Juego</label>
         <div class="slider-container">
-            <input type="range" id="minutes_slider" name="Single-Player_Main Story_Average" min="0" max="5000"
-                value="0">
+            <input type="range" id="minutes_slider" name="Single-Player_Main Story_Average" min="0" max="5000" value="0">
             <span id="minutes_display">0</span> min
         </div>
 
@@ -209,44 +245,45 @@
         // Configuración de drag and drop para géneros
         document.querySelectorAll('.draggable').forEach(item => {
             item.addEventListener('dragstart', event => {
-                event.dataTransfer.setData('text', event.target.id);
+                event.dataTransfer.setData('text', event.target.getAttribute('value'));
             });
         });
-
+    
         const dropzone = document.getElementById('dropzone');
         const genreInput = document.getElementById('genre_encoded');
-
+    
         dropzone.addEventListener('dragover', event => {
             event.preventDefault();
             dropzone.classList.add('highlight');
         });
-
+    
         dropzone.addEventListener('dragleave', () => {
             dropzone.classList.remove('highlight');
         });
-
+    
         dropzone.addEventListener('drop', event => {
             event.preventDefault();
             dropzone.classList.remove('highlight');
-            const id = event.dataTransfer.getData('text');
-            const draggedElement = document.getElementById(id);
-
-            const currentGenres = genreInput.value.split(', ').filter(g => g.trim() !== "");
-            if (!currentGenres.includes(draggedElement.innerText)) {
-                currentGenres.push(draggedElement.innerText);
+            
+            const genreValue = event.dataTransfer.getData('text');
+    
+            // Agregar el género solo si aún no ha sido seleccionado
+            const currentGenres = genreInput.value ? genreInput.value.split(', ') : [];
+            if (!currentGenres.includes(genreValue)) {
+                currentGenres.push(genreValue);
                 genreInput.value = currentGenres.join(', ');
             }
         });
-
+    
         // Configuración de slider para minutos de juego
         const slider = document.getElementById('minutes_slider');
         const display = document.getElementById('minutes_display');
         const availabilityStatus = document.getElementById('availability-status');
-
+    
         slider.addEventListener('input', () => {
             const minutes = slider.value;
             display.textContent = minutes;
-
+    
             // Actualización del texto de disponibilidad según el valor de minutos
             if (minutes >= 0 && minutes <= 400) {
                 availabilityStatus.textContent = "Poca Disponibilidad";
@@ -258,5 +295,4 @@
         });
     </script>
 </body>
-
 </html>
